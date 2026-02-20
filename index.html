@@ -1,17 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Conexi&#243;n &#8212; Life Memories</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;500;600&display=swap"
+    rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
   <script src="https://cdn.jsdelivr.net/npm/topojson-client@3"></script>
   <script src="world-data.js"></script>
   <script src="earth-texture-data.js"></script>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
     body {
       font-family: 'Inter', 'Segoe UI', sans-serif;
@@ -34,7 +41,7 @@
 
     /* Photo Panel */
     .photo-panel {
-      height: 50%;
+      height: 70%;
       position: relative;
       overflow: hidden;
       background: #08090e;
@@ -43,26 +50,82 @@
     .photo-panel::after {
       content: '';
       position: absolute;
-      bottom: 0; left: 0; right: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
       height: 80px;
       background: linear-gradient(to top, #0b0e18 0%, transparent 100%);
       z-index: 5;
       pointer-events: none;
     }
 
-    .photo-panel img {
+    .photo-slide {
       position: absolute;
-      top: 0; left: 0;
+      top: 0;
+      left: 0;
       width: 100%;
       height: 100%;
-      object-fit: contain;
       opacity: 0;
       transition: opacity 1.2s cubic-bezier(0.4, 0, 0.2, 1);
-      filter: brightness(0.9);
+      display: grid;
+      gap: 8px;
+      padding: 8px;
+      background: #000;
+      pointer-events: none;
+      box-sizing: border-box;
+      overflow: hidden;
     }
 
-    .photo-panel img.active {
+    .photo-slide.active {
       opacity: 1;
+      pointer-events: auto;
+    }
+
+    .photo-slide img {
+      width: 100%;
+      height: 100%;
+      min-height: 0;
+      object-fit: cover;
+      filter: brightness(0.95);
+      display: block;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    }
+
+    /* Grid Layouts */
+    .grid-1 {
+      grid-template-columns: 1fr;
+      grid-template-rows: 1fr;
+    }
+
+    .grid-1 img {
+      object-fit: contain;
+      box-shadow: none;
+      filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.5));
+    }
+
+    .grid-2 {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .grid-3 {
+      grid-template-columns: 1.5fr 1fr;
+      grid-template-rows: 1fr 1fr;
+    }
+
+    .grid-3 img:nth-child(1) {
+      grid-row: 1 / span 2;
+    }
+
+    .grid-4 {
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
+    }
+
+    .grid-5,
+    .grid-6 {
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: 1fr 1fr;
     }
 
     /* Slide number overlay on photo */
@@ -81,8 +144,8 @@
 
     /* Text Panel */
     .text-panel {
-      height: 50%;
-      padding: 36px 44px 28px;
+      height: 30%;
+      padding: 24px 44px;
       display: flex;
       flex-direction: column;
       justify-content: center;
@@ -95,10 +158,11 @@
     .text-panel::before {
       content: '';
       position: absolute;
-      top: 0; left: 44px;
+      top: 0;
+      left: 44px;
       width: 40px;
       height: 3px;
-      background: linear-gradient(90deg, rgba(255,120,50,0.6), transparent);
+      background: linear-gradient(90deg, rgba(255, 120, 50, 0.6), transparent);
       border-radius: 2px;
     }
 
@@ -106,7 +170,7 @@
       opacity: 1;
       transform: translateY(0);
       transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1),
-                  transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     .text-content.fading {
@@ -275,7 +339,10 @@
     /* Star field effect */
     .stars {
       position: absolute;
-      top: 0; left: 0; right: 0; bottom: 0;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
       overflow: hidden;
       pointer-events: none;
     }
@@ -302,11 +369,12 @@
     }
   </style>
 </head>
+
 <body>
 
   <!-- Progress bar -->
   <div class="progress-bar">
-    <div class="progress-fill" id="progressFill" style="width: 12.5%"></div>
+    <div class="progress-fill" id="progressFill" style="width: 7.69%"></div>
   </div>
 
   <!-- Left Column -->
@@ -318,7 +386,8 @@
       <div class="text-content" id="textContent">
         <span class="badge" id="badge">success</span>
         <h2 class="slide-title" id="slideTitle">Loading...</h2>
-        <p class="slide-location" id="slideLocation"><span class="pin-icon"></span><span id="slideLocationText">...</span></p>
+        <p class="slide-location" id="slideLocation"><span class="pin-icon"></span><span
+            id="slideLocationText">...</span></p>
         <p class="slide-text" id="slideText">...</p>
       </div>
     </div>
@@ -334,7 +403,7 @@
   <!-- Bottom bar -->
   <div class="bottom-bar">
     <div class="slide-counter" id="slideCounter">
-      <span class="current-num">01</span> / 08
+      <span class="current-num">01</span> / 13
     </div>
     <div class="nav-hint">
       <span class="nav-key">&#8592;</span>
@@ -345,7 +414,7 @@
 
   <script>
     // ─── GENERATE STARS ───
-    (function() {
+    (function () {
       var starsEl = document.getElementById('stars');
       var html = '';
       for (var i = 0; i < 120; i++) {
@@ -354,7 +423,7 @@
         var size = Math.random() * 1.5 + 0.5;
         var opacity = Math.random() * 0.5 + 0.1;
         var delay = Math.random() * 4;
-        html += '<div style="position:absolute;left:' + x + '%;top:' + y + '%;width:' + size + 'px;height:' + size + 'px;background:white;border-radius:50%;opacity:' + opacity + ';animation:twinkle ' + (3 + Math.random()*4) + 's ease-in-out ' + delay + 's infinite alternate"></div>';
+        html += '<div style="position:absolute;left:' + x + '%;top:' + y + '%;width:' + size + 'px;height:' + size + 'px;background:white;border-radius:50%;opacity:' + opacity + ';animation:twinkle ' + (3 + Math.random() * 4) + 's ease-in-out ' + delay + 's infinite alternate"></div>';
       }
       starsEl.innerHTML = html;
       var style = document.createElement('style');
@@ -365,76 +434,108 @@
     // ─── SLIDE DATA ───
     const slides = [
       {
-        img: "img_generics/unnamed.jpg",
-        title: "Placeholder Title",
-        location: "Mexico City, Mexico",
-        lat: 19.4326, lng: -99.1332,
-        type: "success",
-        text: "Placeholder text. Describe this memory \u2014 what happened, what you learned, why it matters to you."
-      },
-      {
-        img: "img_generics/81196810.jpg",
-        title: "Japan Trip",
-        location: "Tokio, Japan",
-        lat: 35.6895, lng: 139.6917,
-        type: "success",
-        text: "Placeholder text. Describe this memory \u2014 what happened, what you learned, why it matters to you."
-      },
-      {
-        img: "img_generics/unnamed-1.jpg",
-        title: "Placeholder Title",
-        location: "Istmo de Tehuantepec, Mexico",
-        lat: 16.3264, lng: -95.2420,
-        type: "success",
-        text: "Placeholder text. Describe this memory \u2014 what happened, what you learned, why it matters to you."
-      },
-      {
-        img: "img_generics/unnamed-2.jpg",
-        title: "Placeholder Title",
-        location: "Real del Monte, Hidalgo, Mexico",
-        lat: 20.1286, lng: -98.6739,
-        type: "success",
-        text: "Placeholder text. Describe this memory \u2014 what happened, what you learned, why it matters to you."
-      },
-      {
-        img: "img_generics/gemini-generated.png",
-        title: "Placeholder Title",
-        location: "Mexico City, Mexico",
-        lat: 19.4326, lng: -99.1332,
+        imgs: ["img/070.jpg", "img/019.jpg", "img/021.jpg"],
+        title: "Primer fracaso: nacer con poco capital cultural",
+        location: "San Francisco Xicaltongo, Iztacalco, CDMX",
+        lat: 19.3965, lng: -99.1130,
         type: "failure",
-        text: "Placeholder text. Describe this memory \u2014 what happened, what you learned, why it matters to you."
+        text: "Primer fracaso, nacer con poco capital cultural."
       },
       {
-        img: "img_generics/06981010835.jog.webp",
-        title: "Placeholder Title",
-        location: "Mexico City, Mexico",
-        lat: 19.4326, lng: -99.1332,
-        type: "success",
-        text: "Placeholder text. Describe this memory \u2014 what happened, what you learned, why it matters to you."
+        imgs: ["img/023.jpg", "img/017.jpg", "img/072.jpg"],
+        title: "Primer fracaso: nacer con poco capital cultural",
+        location: "Istmo de Tehuantepec, Oaxaca",
+        lat: 16.3264, lng: -95.2420,
+        type: "failure",
+        text: "Primer fracaso, nacer con poco capital cultural."
       },
       {
-        img: "img_generics/unnamed.jpg",
-        title: "Placeholder Title",
-        location: "Guadalajara, Jalisco, Mexico",
+        imgs: ["img/059.jpg", "img/012.jpg", "img/065.jpg", "img/015.jpg"],
+        title: "Primer fracaso: nacer con poco capital cultural",
+        location: "Real del Monte, Hidalgo, México",
+        lat: 20.1286, lng: -98.6739,
+        type: "failure",
+        text: "Primer fracaso, nacer con poco capital cultural."
+      },
+      {
+        imgs: ["img/068.jpg", "img/058.jpg", "img/025.jpg", "img/069.jpg"],
+        title: "Primer fracaso: nacer con poco capital cultural",
+        location: "Xochimilco, Ciudad de México",
+        lat: 19.2634, lng: -99.1057,
+        type: "failure",
+        text: "Primer fracaso, nacer con poco capital cultural."
+      },
+      {
+        imgs: ["img/057.jpg", "img/056.jpg", "img/027.jpg", "img/006.jpg"],
+        title: "Segundo fracaso: no haber entrado al COLMEX",
+        location: "Santa Fe, Cuajimalpa, CDMX",
+        lat: 19.3607, lng: -99.2616,
+        type: "failure",
+        text: "Segundo fracaso: no haber entrado al COLMEX."
+      },
+      {
+        imgs: ["img/013.jpg", "img/009.jpg", "img/042.jpg", "img/038.jpg"],
+        title: "Segundo fracaso: no haber podido hacer carrera en CDMX",
+        location: "Guadalajara, Jalisco, México",
         lat: 20.6597, lng: -103.3496,
         type: "failure",
-        text: "Placeholder text. Describe this memory \u2014 what happened, what you learned, why it matters to you."
+        text: "Segundo fracaso: no haber podido hacer carrera en CDMX."
       },
       {
-        img: "img_generics/81196810.jpg",
-        title: "Placeholder Title",
+        imgs: ["img/018.jpg", "img/022.jpg", "img/007.jpg", "img/010.jpg"],
+        title: "Tercer fracaso: no haber entrado a Princeton",
         location: "Chicago, Illinois, USA",
         lat: 41.8781, lng: -87.6298,
-        type: "success",
-        text: "Placeholder text. Describe this memory \u2014 what happened, what you learned, why it matters to you."
+        type: "failure",
+        text: "Tercer fracaso: No haber entrado a Princeton."
       },
       {
-        img: "img_generics/unnamed-1.jpg",
-        title: "Placeholder Title",
-        location: "Shanghai, China",
-        lat: 31.2304, lng: 121.4737,
+        imgs: ["img/024.jpg", "img/008.jpg", "img/005.jpg", "img/032.jpg"],
+        title: "Tercer fracaso: no ser periodista",
+        location: "Polanco, Ciudad de México",
+        lat: 19.4342, lng: -99.1962,
+        type: "failure",
+        text: "Tercer fracaso: no ser periodista, ni dedicarme al tema penitenciario."
+      },
+      {
+        imgs: ["img/014.jpg", "img/043.jpg", "img/041.jpg", "img/033.jpg"],
+        title: "Tercer fracaso: no ser periodista",
+        location: "Polanco, Ciudad de México",
+        lat: 19.4342, lng: -99.1962,
+        type: "failure",
+        text: "Tercer fracaso: no ser periodista, ni dedicarme al tema penitenciario."
+      },
+      {
+        imgs: ["img/039.jpg", "img/040.jpg", "img/037.jpg"],
+        title: "Tercer fracaso: no ser periodista",
+        location: "San Francisco, California, USA",
+        lat: 37.7749, lng: -122.4194,
+        type: "failure",
+        text: "Tercer fracaso: no ser periodista, ni dedicarme al tema penitenciario."
+      },
+      {
+        imgs: ["img/029.jpg", "img/028.jpg", "img/054.jpg", "img/061.jpg"],
+        title: "Cuarto fracaso: no haberme dedicado al hip hop",
+        location: "Iztacalco, CDMX",
+        lat: 19.3965, lng: -99.1130,
+        type: "failure",
+        text: "Cuarto fracaso: no haberme dedicado al hip hop."
+      },
+      {
+        imgs: ["img/001.jpg", "img/060.jpg", "img/020.jpg", "img/034.jpg"],
+        title: "Un éxito: una familia propia",
+        location: "Col. Nápoles, Benito Juárez, CDMX",
+        lat: 19.3938, lng: -99.1722,
         type: "success",
-        text: "Placeholder text. Describe this memory \u2014 what happened, what you learned, why it matters to you."
+        text: "Un éxito: una familia propia."
+      },
+      {
+        imgs: ["img/036.jpg", "img/046.jpg", "img/050.jpg", "img/045.jpg"],
+        title: "Un éxito: una familia propia",
+        location: "Col. Nápoles, Benito Juárez, CDMX",
+        lat: 19.3938, lng: -99.1722,
+        type: "success",
+        text: "Un éxito: una familia propia."
       }
     ];
 
@@ -449,14 +550,28 @@
 
     // ─── DOM ───
     var photoPanel = document.getElementById('photoPanel');
-    slides.forEach(function(slide, i) {
-      var img = document.createElement('img');
-      img.src = slide.img;
-      img.alt = slide.title;
-      if (i === 0) img.classList.add('active');
-      photoPanel.appendChild(img);
+    slides.forEach(function (slide, i) {
+      var slideEl = document.createElement('div');
+      slideEl.className = 'photo-slide';
+
+      // Determine grid class
+      var count = slide.imgs.length;
+      if (count === 1) slideEl.classList.add('grid-1');
+      else if (count === 2) slideEl.classList.add('grid-2');
+      else if (count === 3) slideEl.classList.add('grid-3');
+      else if (count >= 4) slideEl.classList.add('grid-4');
+
+      slide.imgs.forEach(function (src) {
+        var img = document.createElement('img');
+        img.src = src;
+        img.alt = slide.title;
+        slideEl.appendChild(img);
+      });
+
+      if (i === 0) slideEl.classList.add('active');
+      photoPanel.appendChild(slideEl);
     });
-    var photoImages = photoPanel.querySelectorAll('img');
+    var photoSlides = photoPanel.querySelectorAll('.photo-slide');
 
     var textContent = document.getElementById('textContent');
     var badge = document.getElementById('badge');
@@ -494,7 +609,7 @@
     var path = d3.geoPath(projection, ctx);
 
     // Load texture
-    earthImg.onload = function() {
+    earthImg.onload = function () {
       earthTexW = earthImg.width;
       earthTexH = earthImg.height;
       offCanvas.width = earthTexW;
@@ -558,7 +673,7 @@
             for (var sy = 0; sy < step && (py + sy) < globeHeight; sy++) {
               for (var sx = 0; sx < step && (px + sx) < globeWidth; sx++) {
                 var dstIdx = ((py + sy) * globeWidth + (px + sx)) * 4;
-                pixels[dstIdx]     = Math.round(earthPixels[srcIdx] * edgeDim);
+                pixels[dstIdx] = Math.round(earthPixels[srcIdx] * edgeDim);
                 pixels[dstIdx + 1] = Math.round(earthPixels[srcIdx + 1] * edgeDim);
                 pixels[dstIdx + 2] = Math.round(earthPixels[srcIdx + 2] * edgeDim);
                 pixels[dstIdx + 3] = 255;
@@ -639,10 +754,10 @@
     var isFirstSlide = true;
 
     function easeInOutCubic(t) {
-      return t < 0.5 ? 4*t*t*t : 1 - Math.pow(-2*t+2, 3) / 2;
+      return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
     }
     function easeInOutQuad(t) {
-      return t < 0.5 ? 2*t*t : 1 - Math.pow(-2*t+2, 2) / 2;
+      return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
     }
 
     function animateToLocation(targetLat, targetLng) {
@@ -720,8 +835,9 @@
       }
 
       // Photo crossfade
-      photoImages.forEach(function(img, i) {
-        img.classList.toggle('active', i === index);
+      // Photo crossfade
+      photoSlides.forEach(function (slideEl, i) {
+        slideEl.classList.toggle('active', i === index);
       });
 
       // Update photo number
@@ -732,7 +848,7 @@
 
       // Text fade out, update, fade in
       textContent.classList.add('fading');
-      setTimeout(function() {
+      setTimeout(function () {
         badge.textContent = slide.type;
         badge.className = 'badge ' + slide.type;
         slideTitle.textContent = slide.title;
@@ -763,7 +879,7 @@
       if (previousIndex < 0) return false;
       return slides[previousIndex].lat === slides[nextIdx].lat && slides[previousIndex].lng === slides[nextIdx].lng;
     }
-    document.addEventListener('keydown', function(e) {
+    document.addEventListener('keydown', function (e) {
       if (navigating) return;
       if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
         e.preventDefault();
@@ -772,7 +888,7 @@
         var cooldown = sameLocationAs(nextIdx) ? 900 : 2900;
         currentIndex = nextIdx;
         goToSlide(currentIndex);
-        setTimeout(function() { navigating = false; }, cooldown);
+        setTimeout(function () { navigating = false; }, cooldown);
       } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
         e.preventDefault();
         navigating = true;
@@ -780,12 +896,12 @@
         var cooldown = sameLocationAs(nextIdx) ? 900 : 2900;
         currentIndex = nextIdx;
         goToSlide(currentIndex);
-        setTimeout(function() { navigating = false; }, cooldown);
+        setTimeout(function () { navigating = false; }, cooldown);
       }
     });
 
     // ─── RESIZE ───
-    window.addEventListener('resize', function() {
+    window.addEventListener('resize', function () {
       sizeGlobe();
       projection.translate([globeWidth / 2, globeHeight / 2]).scale(globeRadius);
       baseScale = globeRadius;
@@ -794,4 +910,5 @@
     });
   </script>
 </body>
+
 </html>

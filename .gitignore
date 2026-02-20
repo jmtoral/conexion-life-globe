@@ -13,8 +13,6 @@ Desktop.ini
 # Claude Code
 .claude/
 
-# Personal photos (not included in repo — see README)
-img/
 
 # Misc
 *.log
